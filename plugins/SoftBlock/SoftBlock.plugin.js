@@ -4,8 +4,8 @@
  * @authorLink undefined
  * @donate undefined
  * @patreon undefined
- * @website 
- * @source 
+ * @website https://github.com/Notavone/BDAddons
+ * @source https://raw.githubusercontent.com/Notavone/BDAddons/master/plugins/SoftBlock/SoftBlock.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -32,7 +32,7 @@
 @else@*/
 
 module.exports = (() => {
-    const config = {"main":"index.js","info":{"name":"SoftBlock","authors":[{"name":"Notavone","github_username":"notavone"}],"version":"1.0.0","description":"Désactive l'affichage des messages des gens que vous appréciez assez pour ne pas les bloquer","github":"","github_raw":""},"changelog":[],"defaultConfig":[{"type":"textbox","id":"blocked","name":"Bloqués","note":"Identifiants des personnes à bloquer séparés par \",\"","value":"","placeholder":"178896511378259968, 416275248153886720"},{"type":"textbox","id":"servers","name":"Serveurs impactés","note":"Identifiants des serveurs à impacter séparés par \",\"","value":"","placeholder":"727082219318935562, 700448965661032550"},{"type":"switch","id":"useEverywhere","name":"Activer partout","note":"Outrepasse les permissions des serveurs impactés","value":true},{"type":"switch","id":"showDm","name":"Afficher les DM","note":"Laisser visible les messages dans les messages privés","value":false},{"type":"switch","id":"showGuild","name":"Afficher dans les serveurs","note":"Laisser visible les messages dans les salons des serveurs","value":false},{"type":"switch","id":"showTyping","name":"Afficher \"en train d'écrire\"","note":"Laisser visible qui est en train d'écrire","value":true},{"type":"switch","id":"showReplies","name":"Afficher les réponses","note":"Laisser visible les réponses aux messages","value":false},{"type":"switch","id":"showMembers","name":"Afficher dans la liste des membres","note":"Laisser visible les personnes bloqués dans la liste des membres","value":false}]};
+    const config = {"main":"index.js","info":{"name":"SoftBlock","authors":[{"name":"Notavone","github_username":"notavone"}],"version":"1.0.0","description":"Désactive l'affichage des messages des gens que vous appréciez assez pour ne pas les bloquer","github":"https://github.com/Notavone/BDAddons","github_raw":"https://raw.githubusercontent.com/Notavone/BDAddons/master/plugins/SoftBlock/SoftBlock.plugin.js"},"changelog":[],"defaultConfig":[{"type":"textbox","id":"blocked","name":"Bloqués","note":"Identifiants des personnes à bloquer séparés par \",\"","value":"","placeholder":"178896511378259968, 416275248153886720"},{"type":"textbox","id":"servers","name":"Serveurs impactés","note":"Identifiants des serveurs à impacter séparés par \",\"","value":"","placeholder":"727082219318935562, 700448965661032550"},{"type":"switch","id":"useEverywhere","name":"Activer partout","note":"Outrepasse les permissions des serveurs impactés","value":true},{"type":"switch","id":"showDm","name":"Afficher les DM","note":"Laisser visible les messages dans les messages privés","value":false},{"type":"switch","id":"showGuild","name":"Afficher dans les serveurs","note":"Laisser visible les messages dans les salons des serveurs","value":false},{"type":"switch","id":"showTyping","name":"Afficher \"en train d'écrire\"","note":"Laisser visible qui est en train d'écrire","value":true},{"type":"switch","id":"showReplies","name":"Afficher les réponses","note":"Laisser visible les réponses aux messages","value":false},{"type":"switch","id":"showMembers","name":"Afficher dans la liste des membres","note":"Laisser visible les personnes bloqués dans la liste des membres","value":false}]};
 
     return !global.ZeresPluginLibrary ? class {
         constructor() {this._config = config;}
@@ -62,16 +62,14 @@ module.exports = (() => {
     return class SoftBlock extends Plugin {
         removeTyping(guild, channel, blocked) {
             let typingElement = Array.from(document.querySelectorAll("div[class^='typing']"))[0];
-            // if (typing) typing.style.display = "none" PAS BIEN VILAIN NUL
             if (typingElement) {
                 let membersSpan = typingElement.children[1];
-                Array.from(membersSpan.children).forEach((strongElement) => {
+                Array.from(membersSpan.children).filter((child) => child.tagName === "STRONG").forEach((strongElement) => {
                     let guildMember = guild.members.find((member) => member.name === strongElement.innerText);
-                    if(blocked.includes(guildMember.userId)) {
-                        strongElement.remove();
-                        console.log(guildMember)
+                    if (blocked.includes(guildMember.userId)) {
+                        strongElement.style.display = "none";
                     }
-                    if(membersSpan.children.length === 0) typingElement.style.display = "none";
+                    if (Array.from(membersSpan.children).filter((child) => child.style.display !== "none").length === 0) typingElement.style.display = "none";
                 })
             }
         }
@@ -96,21 +94,29 @@ module.exports = (() => {
                 let guildMember = guild.members.find((member) => member.name === nick || member.nickname === nick);
                 if (blocked.includes(guildMember.userId)) {
                     let previousSibling = memberElement.previousSibling;
-                    memberElement.remove();
+                    memberElement.style.display = "none";
                     while (previousSibling.tagName !== 'H2') previousSibling = previousSibling.previousSibling;
-                    let memberCount = previousSibling.firstChild.innerText.split("").pop();
-                    if (memberCount === "1" || previousSibling.nextSibling.tagName === "H2") {
-                        previousSibling.style.display = "none"
+                    // let memberCount = previousSibling.firstChild.innerText.split("").pop();
+                    // if (memberCount === "1" || previousSibling.nextSibling.tagName === "H2") {
+                    //     previousSibling.style.display = "none"
+                    // }
+                    let nextNode = previousSibling.nextSibling ? previousSibling.nextSibling : previousSibling;
+                    let elements = [];
+                    while (nextNode.tagName !== 'H2') {
+                        elements.push(nextNode);
+                        if (nextNode.nextSibling) nextNode = nextNode.nextSibling;
+                        else break
                     }
+                    if (elements.filter((elem) => elem.style.display !== "none").length === 0) previousSibling.style.display = "none";
                 }
             })
         }
 
-        removeMessages(channel, blocked) {
+        removeTextMessages(channel, blocked) {
             let blockedMessage = channel.messages.filter((message) => message.author !== null && blocked.includes(message.author.id));
             blockedMessage.forEach((message) => {
                 let elem = document.getElementById("chat-messages-" + message.id);
-                elem.style.display = "none"
+                if (elem) elem.style.display = "none"
             })
         }
 
@@ -131,23 +137,30 @@ module.exports = (() => {
             return panel.getElement();
         }
 
-        observer() {
-            let blocked = this.settings["blocked"].split(/,\s?/);
-            let servers = this.settings["servers"].split(/,\s?/);
-            let {showDm, showGuild, showTyping, showReplies, showMembers, useEverywhere} = this.settings;
-            let channel = DiscordAPI.currentChannel;
-            let guild = DiscordAPI.currentGuild;
+        async observer() {
+            try {
 
-            if (useEverywhere || servers.includes(guild.id)) {
-                if (!showTyping) this.removeTyping(guild, channel, blocked);
-                if (!showMembers) this.removeMembers(guild, blocked);
-                if (!showReplies) this.removeReplies(guild, blocked)
-            }
+                let blocked = this.settings["blocked"].split(/,\s?/);
+                let servers = this.settings["servers"].split(/,\s?/);
+                let {showDm, showGuild, showTyping, showReplies, showMembers, useEverywhere} = this.settings;
+                let channel = DiscordAPI.currentChannel;
+                let guild = DiscordAPI.currentGuild;
 
-            let canExecuteInDM = !showDm && channel.type === "GUILD_TEXT";
-            let canExecuteInGuild = !showGuild && channel.type === "GUILD_TEXT";
-            if (channel && (canExecuteInDM || canExecuteInGuild)) {
-                this.removeMessages(channel, blocked)
+                if (useEverywhere || (guild && servers.includes(guild.id))) {
+                    if (!showTyping) await this.removeTyping(guild, channel, blocked);
+                    if (!showMembers) await this.removeMembers(guild, blocked);
+                    if (!showReplies) await this.removeReplies(guild, blocked);
+
+                    if (channel) {
+                        let canExecuteInDM = !showDm && channel.type === "GUILD_TEXT";
+                        let canExecuteInGuild = !showGuild && channel.type === "GUILD_TEXT";
+                        if (canExecuteInDM || canExecuteInGuild) {
+                            await this.removeTextMessages(channel, blocked)
+                        }
+                    }
+                }
+            } catch (e) {
+                return console.log(e);
             }
         }
     };
