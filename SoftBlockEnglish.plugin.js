@@ -1,7 +1,7 @@
 /**
  * @name SoftBlock
- * @website https://github.com/Notavone/BDAddons
- * @source https://raw.githubusercontent.com/Notavone/BDAddons/master/plugins/SoftBlock/SoftBlock.plugin.js
+ * @website https://github.com/ikeman2003/BDAddons
+ * @source https://raw.githubusercontent.com/ikeman2003/BDAddons/master/SoftBlockEnglish.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -28,8 +28,7 @@
 @else@*/
 
 module.exports = (() => {
-    const config = {"main":"index.js","info":{"name":"SoftBlock","authors":[{"name":"Notavone","github_username":"notavone"}],"version":"1.0.1","description":"Disable the display of messages from people you like enough not to block them","github":"https://github.com/Notavone/BDAddons","github_raw":"https://raw.githubusercontent.com/Notavone/BDAddons/master/plugins/SoftBlock/SoftBlock.plugin.js"},"changelog":[],"defaultConfig":[{"type":"textbox","id":"blocked","name":"Blocked","note":"Identifiers of the persons to be blocked separated by \",\"","value":"","placeholder":"178896511378259968, 416275248153886720"},{"type":"textbox","id":"servers","name":"Impacted servers","note":"Identifiers of the servers to be impacted separated by \",\"","value":"","placeholder":"727082219318935562, 700448965661032550"},{"type":"switch","id":"useEverywhere","name":"Activate everywhere","note":"Overrides the permissions of impacted servers","value":true},{"type":"switch","id":"showDm","name":"Display DMs","note":"Leave visible messages in private messages","value":false},{"type":"switch","id":"showGuild","name":"Display in servers","note":"Leave messages visible in server rooms","value":false},{"type":"switch","id":"showTyping","name":"View \"typing\"","note":"Let it be seen who is typing","value":true},{"type":"switch","id":"showReplies","name":"Show answers","note":"Leave visible the answers to the messages","value":false},{"type":"switch","id":"showMembers","name":"Display in the members list","note":"Leave visible the blocked people in the list of members","value":false}]};
-
+    const config = {"main":"index.js","info":{"name":"SoftBlock","authors":[{"name":"ikeman2003","github_username":"ikeman2003"}],"version":"1.0.2","description":"Disable the display of messages from people you like enough not to block them","github":"https://github.com/ikeman2003/BDAddons","github_raw":"https://raw.githubusercontent.com/ikeman2003/BDAddons/master/SoftBlockEnglish.plugin.js"},"changelog":[],"defaultConfig":[{"type":"textbox","id":"blocked","name":"Blocked","note":"Identifiers of the persons to be blocked separated by \",\"","value":"","placeholder":"178896511378259968, 416275248153886720"},{"type":"textbox","id":"servers","name":"Impacted servers","note":"Identifiers of the servers to be impacted separated by \",\"","value":"","placeholder":"727082219318935562, 700448965661032550"},{"type":"switch","id":"useEverywhere","name":"Activate everywhere","note":"Overrides the permissions of impacted servers","value":true},{"type":"switch","id":"showDm","name":"Display DMs","note":"Leave visible messages in private messages","value":false},{"type":"switch","id":"showGuild","name":"Display in servers","note":"Leave messages visible in server rooms","value":false},{"type":"switch","id":"showTyping","name":"View \"typing\"","note":"Let it be seen who is typing","value":true},{"type":"switch","id":"showReplies","name":"Show answers","note":"Leave visible the answers to the messages","value":false},{"type":"switch","id":"showMembers","name":"Display in the members list","note":"Leave visible the blocked people in the list of members","value":false}]};
     return !global.ZeresPluginLibrary ? class {
         constructor() {this._config = config;}
         getName() {return config.info.name;}
